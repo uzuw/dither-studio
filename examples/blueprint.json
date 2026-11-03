@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "title": "Hello, I'm Ujjwal.",
+  "subtitle": "Curious by default. Drawn to code, design, and the small details that make something feel alive.",
+  "tagline": "Stay curious. Make small things matter.",
+  "font": "mono",
+  "pattern": "bayer",
+  "radius": 4,
+  "palette": {
+    "background": "#EDF3FF",
+    "foreground": "#153066",
+    "muted": "#425B85",
+    "accent": "#2855D9",
+    "grid": "#D4E0F5"
+  },
+  "links": [
+    { "label": "GitHub", "url": "https://github.com/uzuw" },
+    { "label": "LinkedIn", "url": "https://www.linkedin.com/in/uzuw/" },
+    { "label": "Instagram", "url": "https://www.instagram.com/uwuzu_/" }
+  ]
+}

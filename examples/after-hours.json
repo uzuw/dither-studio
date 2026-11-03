@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "title": "Built after hours.",
+  "subtitle": "A few ideas, a lot of curiosity, and one more commit before bed.",
+  "tagline": "One good idea at a time.",
+  "font": "serif",
+  "pattern": "dots",
+  "radius": 20,
+  "palette": {
+    "background": "#211C38",
+    "foreground": "#F4EEFF",
+    "muted": "#C1B1D9",
+    "accent": "#C9ADFF",
+    "grid": "#44365E"
+  },
+  "links": []
+}

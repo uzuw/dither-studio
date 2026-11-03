@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dither card recipe v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 1 },
+    "title": {
+      "type": "string",
+      "maxLength": 64,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]*$"
+    },
+    "subtitle": {
+      "type": "string",
+      "maxLength": 140,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]*$"
+    },
+    "tagline": {
+      "type": "string",
+      "maxLength": 64,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]*$"
+    },
+    "font": { "enum": ["sans", "mono", "serif"] },
+    "pattern": { "enum": ["bayer", "dots", "weave"] },
+    "radius": { "type": "integer", "minimum": 0, "maximum": 24 },
+    "palette": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "background": { "$ref": "#/$defs/color" },
+        "foreground": { "$ref": "#/$defs/color" },
+        "muted": { "$ref": "#/$defs/color" },
+        "accent": { "$ref": "#/$defs/color" },
+        "grid": { "$ref": "#/$defs/color" }
+      }
+    },
+    "links": {
+      "type": "array",
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label", "url"],
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 24,
+            "pattern": "^(?=.*\\S)[^\\u0000-\\u001f\\u007f]*$"
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 200,
+            "format": "uri",
+            "pattern": "^https://[^/?#@\\s]+(?:[/?#][^\\u0000-\\u0020]*)?$"
+          }
+        }
+      }
+    }
+  },
+  "$defs": { "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" } }
+}

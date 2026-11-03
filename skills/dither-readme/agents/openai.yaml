@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dither README"
+  short_description: "Make dithered GitHub artwork and personal READMEs"
+  default_prompt: "Use $dither-readme to turn my design brief into GitHub profile artwork and a README."

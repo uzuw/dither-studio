@@ -1,0 +1,14 @@
+node_modules/
+.next/
+.vercel/
+.env*
+!.env.example
+*.tsbuildinfo
+coverage/
+output/
+artifacts/
+.DS_Store
+.playwright-mcp/
+task_plan.md
+findings.md
+progress.md
