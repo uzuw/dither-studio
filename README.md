@@ -7,7 +7,11 @@ Enter a GitHub username, choose a layout, customize the design, and copy one lin
 into your README. Or give the included skill to your coding agent and make a
 whole profile of your own. Open source under the [MIT license](LICENSE).
 
-![A Dither contribution calendar with clearly labeled sample data](docs/preview.svg)
+[Open the studio](https://dither-studio-olive.vercel.app) · [Get the agent skill](skills/dither-readme/SKILL.md)
+
+![A Dither contribution calendar with clearly labeled sample data](https://dither-studio-olive.vercel.app/api/sample?theme=midnight)
+
+[Static artwork preview](docs/preview.svg)
 
 ## Run the studio
 
