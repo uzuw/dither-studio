@@ -14,8 +14,30 @@
     "grid": "#D4E0F5"
   },
   "links": [
-    { "label": "GitHub", "url": "https://github.com/uzuw" },
-    { "label": "LinkedIn", "url": "https://www.linkedin.com/in/uzuw/" },
-    { "label": "Instagram", "url": "https://www.instagram.com/uwuzu_/" }
-  ]
+    {
+      "label": "GitHub",
+      "url": "https://github.com/uzuw"
+    },
+    {
+      "label": "LinkedIn",
+      "url": "https://www.linkedin.com/in/uzuw/"
+    },
+    {
+      "label": "Instagram",
+      "url": "https://www.instagram.com/uwuzu_/"
+    }
+  ],
+  "metrics": [
+    "pullRequests",
+    "stars",
+    "currentStreak",
+    "longestStreak",
+    "reviews",
+    "issues",
+    "contributions",
+    "activeDays"
+  ],
+  "chartStyle": "area",
+  "groupBy": "week",
+  "repoCount": 3
 }

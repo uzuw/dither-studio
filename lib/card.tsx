@@ -1,7 +1,20 @@
 import { renderToStaticMarkup } from "react-dom/server.node";
 import type { ReactNode } from "react";
-import { defaultRecipe, type CardOptions, type Recipe } from "./recipe";
+import {
+  defaultRecipe,
+  metricNames,
+  type CardOptions,
+  type Recipe,
+} from "./recipe";
 import type { Profile } from "./types";
+import {
+  ActivityChart,
+  metricValue,
+  cardHeight,
+  InsightChart,
+  MetricGrid,
+  RepositoryList,
+} from "./charts";
 
 export const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
 export function filledPositions(level: number): number[] {
@@ -200,44 +213,6 @@ function Calendar({ profile, recipe }: { profile: Profile; recipe: Recipe }) {
   );
 }
 
-function Stats({ profile, recipe }: { profile: Profile; recipe: Recipe }) {
-  const metrics = [
-    [profile.total, "Contributions"],
-    [profile.stats.activeDays, "Active days"],
-    [profile.stats.currentStreak, "Current streak"],
-    [profile.stats.longestStreak, "Longest streak in period"],
-  ] as const;
-  return (
-    <>
-      {metrics.map(([value, label], i) => (
-        <g key={label} transform={`translate(${40 + i * 228} 0)`}>
-          <text
-            y="155"
-            fontSize={fitFont(fmt(value), 44, 190)}
-            fontWeight="600"
-            style={{ fontVariantNumeric: "tabular-nums" }}
-          >
-            {fmt(value)}
-          </text>
-          <text y="185" fontSize="13" fill={recipe.palette.muted}>
-            {label}
-          </text>
-          {[1, 2, 3, 4].map((level) => (
-            <rect
-              key={level}
-              x={(level - 1) * 16}
-              y="209"
-              width="12"
-              height="12"
-              fill={`url(#d${level})`}
-            />
-          ))}
-        </g>
-      ))}
-    </>
-  );
-}
-
 function wrapText(text: string, width: number): string[] {
   const lines: string[] = [];
   for (const word of text.split(/\s+/)) {
@@ -316,11 +291,22 @@ export function renderCard(
   sample = sample || profile.source === "sample";
   const recipe = options.recipe ?? defaultRecipe(options.theme),
     portrait = options.layout === "profile";
-  const height = portrait ? 388 : options.layout === "calendar" ? 360 : 300;
+  const height = cardHeight(options.layout, recipe);
   const title = portrait
     ? `${profile.username}'s profile`
     : `${profile.username}'s GitHub ${options.layout}`;
-  const description = `${sample ? "Sample data. " : ""}${fmt(profile.total)} contributions, ${profile.stats.activeDays} active days. ${displayDate(profile.start)} to ${displayDate(profile.end)}. Current streak ${profile.stats.currentStreak} days; longest streak in period ${profile.stats.longestStreak} days. UTC dates; cached updates.`;
+  const summary =
+    options.layout === "stats"
+      ? recipe.metrics
+          .map(
+            (metric) =>
+              `${metricNames[metric]}: ${metricValue(profile, metric) === null ? "unavailable" : fmt(metricValue(profile, metric)!)}.`,
+          )
+          .join(" ")
+      : options.layout === "repositories" && profile.repositories
+        ? `${fmt(profile.repositories.stars)} current stars across ${fmt(profile.repositories.totalCount)} public owned repositories.`
+        : `${fmt(profile.total)} contributions represented in the displayed period.`;
+  const description = `${sample ? "Sample data. " : ""}${summary} ${displayDate(profile.start)} to ${displayDate(profile.end)}. Activity uses UTC dates; repository counts and stars are current totals. Cached updates.`;
   return `<?xml version="1.0" encoding="UTF-8"?>${renderToStaticMarkup(
     <Canvas
       recipe={recipe}
@@ -333,7 +319,7 @@ export function renderCard(
           <text
             x="40"
             y="43"
-            fontSize={fitFont(recipe.title || `@${profile.username}`, 22, 600)}
+            fontSize={fitFont(recipe.title || `@${profile.username}`, 22, 430)}
             fontWeight="600"
           >
             {recipe.title || `@${profile.username}`}
@@ -352,9 +338,34 @@ export function renderCard(
       {options.layout === "calendar" ? (
         <Calendar profile={profile} recipe={recipe} />
       ) : options.layout === "stats" ? (
-        <Stats profile={profile} recipe={recipe} />
-      ) : (
+        <MetricGrid profile={profile} recipe={recipe} />
+      ) : options.layout === "overview" ? (
+        <>
+          <MetricGrid profile={profile} recipe={recipe} />
+          <ActivityChart
+            profile={profile}
+            recipe={recipe}
+            y={110 + Math.ceil(recipe.metrics.length / 4) * 96}
+            width={540}
+            height={Math.max(220, recipe.repoCount * 64 + 35)}
+          />
+          <RepositoryList
+            profile={profile}
+            recipe={recipe}
+            x={620}
+            y={110 + Math.ceil(recipe.metrics.length / 4) * 96}
+            width={300}
+            compact
+          />
+        </>
+      ) : options.layout === "frequency" ? (
+        <ActivityChart profile={profile} recipe={recipe} height={215} />
+      ) : options.layout === "repositories" ? (
+        <RepositoryList profile={profile} recipe={recipe} />
+      ) : options.layout === "profile" ? (
         <Portrait profile={profile} recipe={recipe} />
+      ) : (
+        <InsightChart profile={profile} recipe={recipe} kind={options.layout} />
       )}
       <line
         x1="40"

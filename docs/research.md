@@ -1,3 +1,31 @@
+# Separate-card product direction
+
+On 2026-11-04 the user clarified that each card type must have a distinct route
+and focused SVG. The gallery replaces the default combined overview. PRs, stars,
+streak summaries and charts are separate cards with their own editors and
+embeds. Existing overview image URLs stay supported for compatibility.
+
+---
+
+# Current product direction
+
+The user clarified on 2026-11-04: lead with PRs, stars, top repositories,
+streaks and contribution frequency curves, with distinctive alternate graphs
+and deeper composition controls. The classic calendar is an optional view.
+The calendar-first recommendation below is historical and superseded.
+
+The implemented views are overview, stats, frequency, weekday rhythm, activity
+distribution, streak spectrum, repositories, calendar and profile. Do not claim
+exclusive or first-of-their-kind graphs without a current competitor audit.
+
+[GitHub's User/ContributionsCollection reference](https://docs.github.com/en/graphql/reference/users)
+confirms period PR/review/issue/commit counters and public/ownership repository
+filters. [Repository fields](https://docs.github.com/en/graphql/reference/repos)
+provide stargazer and fork counts. Stars received are summed over all public
+owned repository pages; starredRepositories would measure stars given instead.
+
+---
+
 # Dither: references and feasibility
 
 Research date: 2026-11-03. This is a proposed build direction, not an implemented

@@ -2,12 +2,13 @@
 
 ## Product
 
-Build a public GitHub contribution graph and stats generator, hosted on Vercel.
-A visitor enters a GitHub username, sees a dithered card, chooses a palette, and
+Build a public GitHub profile stats and chart studio, hosted on Vercel.
+A visitor chooses a card type, enters a GitHub username on its dedicated page, customizes that card, and
 copies a working Markdown image embed into their profile README.
 
 Working name: **Dither**. Treat “status” in the initial brief as profile stats,
 not availability, GitHub service health, or permission to change a user's status.
+The user clarified that each card type needs its own route and focused SVG; do not combine all stats and charts in a single card. The classic calendar is optional.
 Reference research and the reasons for these decisions live in
 [docs/research.md](docs/research.md).
 
@@ -28,17 +29,25 @@ Reference research and the reasons for these decisions live in
 
 ## First release
 
-1. One generator page with a labeled username field and Generate button.
-2. Three card layouts: `calendar`, `stats`, and `profile`. Calendar includes its contribution
-   total; stats shows total contributions, active days, current streak, and
-   longest streak within the displayed period.
+1. A card gallery at `/`, linking to dedicated editors at `/cards/{type}`;
+   each editor has a labeled username field and Generate button.
+2. Eleven focused card types: `stats`, `pull-requests`, `stars`, `streaks`,
+   `frequency`, `rhythm`, `distribution`, `streak-spectrum`, `repositories`,
+   `calendar`, and `profile`. Contribution stats contain contributions/commits/
+   active days; PR cards contain PRs/reviews; stars cards contain stars/public
+   owned repo counts; streak cards contain current/longest/active days.
+   Only allow metrics belonging to the selected card type. Each chart is a
+   separate SVG card. Keep the legacy combined overview image contract for
+   existing embeds; do not feature it in the gallery or new exports.
 3. Two starting palettes: `paper` and `midnight`; ordered pixels, halftone dots,
-   and woven ink textures. Bounded JSON recipes customize colors, text, corners,
-   fonts, and links. Agents can edit source for arbitrary compositions.
-4. A preview using the exact SVG endpoint used in the generated README snippet.
+   and woven ink textures. Bounded JSON recipes customize up to eight metrics
+   and their order, area/line/bar curves, day/week/month grouping, one to five
+   repositories, all colors, text, corners, fonts, and links.
+   Agents can edit source for arbitrary compositions.
+4. A preview using the exact dedicated SVG endpoint used in the generated README snippet.
 5. Copy Markdown, copy image URL, and download the same SVG.
-6. Shareable generator URLs preserving username, layout, and palette.
-7. A portable agent skill and CLI for profile headers, calendars, stats, linked
+6. Shareable card editor URLs preserving card type, username, palette, and recipe.
+7. A portable agent skill and CLI for profile headers, stats, charts, calendars, linked
    social panels, and local Markdown, plus documented source extension points.
 8. Useful loading, invalid username, user not found, empty activity, unavailable
    credentials, quota exhausted, and upstream failure states.
@@ -49,7 +58,7 @@ in the first release. Add these only in response to a demonstrated need.
 
 ## Visual direction
 
-Make this feel like a digital print studio. The dithered calendar is the focal
+Make this feel like a digital print studio. The card gallery and the selected card preview are the focal
 point. Keep surrounding controls quiet and left aligned; show a useful sample
 immediately, clearly marked as a sample until a real lookup succeeds.
 
@@ -78,7 +87,7 @@ Your GitHub, printed differently.
 [ GitHub username                         ] [Generate]
 
 [ Layout        ]   [ Actual SVG preview              ]
-[ Paper/Midnight]   [ calendar or stats                ]
+[ Paper/Midnight]   [ stats, curve, top repositories    ]
                     [ Markdown snippet      ] [Copy]
                     [Copy image URL] [Download SVG]
 ```
@@ -109,6 +118,13 @@ Your GitHub, printed differently.
 - Distinguish padding/future dates from actual zero-contribution days. Use the
   returned week/date structure; do not assume every calendar has 53 full weeks.
 - Counts and dates stay exact even when the visual representation is stylized.
+- Curves aggregate exact observed counts into UTC day/week/month buckets;
+  partial buckets remain partial, and missing dates are not invented zero days.
+- Weekday rhythm divides by actual observed weekday counts. Distribution bins
+  (0, 1–4, 5–9, 10–19, 20+) describe counts and do not replace GitHub levels.
+- Streak spectrum counts contiguous active runs bounded by the returned period;
+  missing dates and zero days break runs. Do not claim these views are exclusive
+  to Dither without competitor evidence.
 
 ## Architecture
 
@@ -127,13 +143,18 @@ Your GitHub, printed differently.
 Suggested files; create them only as implementation reaches them:
 
 ```text
-app/page.tsx                          generator
+app/page.tsx                          card gallery
+app/cards/[type]/page.tsx             dedicated card editor
+lib/cards.ts                         card definitions and scoped options
+lib/card-response.ts                 shared SVG HTTP handling
 app/api/profile/[username]/route.ts   JSON for generator states and summary
-app/api/card/[username]/route.ts      README-compatible SVG
+app/api/card/[username]/[type]/route.ts dedicated README SVG
+app/api/card/[username]/route.ts      legacy README SVG
 components/generator.tsx              form, controls, preview, export
 lib/github.ts                        server-only query and cached loader
 lib/stats.ts                         pure date/streak calculations
 lib/card.tsx                         SVG layouts and dither patterns
+lib/charts.tsx                       metrics and chart compositions
 lib/options.ts                       shared validation and option defaults
 tests/                               focused fixtures and regression checks
 ```
@@ -142,14 +163,20 @@ tests/                               focused fixtures and regression checks
 
 - `GET /api/profile/{username}` returns sanitized profile/calendar data, derived
   stats, period boundaries, and the actual upstream fetch timestamp.
-- `GET /api/card/{username}?layout=calendar&theme=paper` returns SVG.
-  Supported layouts: `calendar|stats|profile`; themes: `paper|midnight`.
-  Optional `recipe` is base64url UTF-8 JSON, validated by `lib/recipe.ts`,
-  documented in `docs/customization.md`, and described by the editor schema.
-  Keep those contracts and the portable skill aligned when adding options.
-- Omitted options use `calendar` and `paper`. Reject invalid/unknown options
-  without fetching GitHub. Normalize username case, parameter order, and explicit
-  defaults to one canonical URL so arbitrary variants cannot fragment the cache.
+- `GET /api/card/{username}/{type}?theme=paper` returns the selected card's SVG.
+  Types are the eleven gallery choices above; `/api/sample/{type}` returns a
+  clearly labeled sample of the same card. `theme` and `recipe` are supported;
+  reject `layout` on typed routes because the path determines it.
+- `/cards/{type}` is the dedicated editor; page options include `username`,
+  `theme`, and bounded `recipe`. Its preview, copy and download use that type's
+  image route. Changing card type navigates to another editor route.
+- Legacy `GET /api/card/{username}?layout=...` and `/api/sample?layout=...`
+  retain the nine renderer layouts and calendar/paper defaults for old embeds.
+  Definitions in `lib/cards.ts` map focused card types to render layouts and
+  allowed metrics. Keep these, `lib/recipe.ts`, the schema, docs and skill aligned.
+- Reject invalid/unknown options and out-of-card metrics before fetching GitHub.
+  Normalize username case, parameter order, and explicit defaults to one
+  canonical URL so variants cannot fragment the cache.
 - Validate username shape and length before fetching. Accept only a GitHub
   login, not an arbitrary URL. Use GraphQL variables, never string interpolation.
 - Construct copied URLs with `URL`/`URLSearchParams`; include only supported
@@ -170,14 +197,18 @@ tests/                               focused fixtures and regression checks
 Example Markdown shape, using an explicitly illustrative domain:
 
 ```md
-[![octocat's GitHub contribution calendar](https://YOUR-DOMAIN/api/card/octocat?layout=calendar&theme=paper)](https://github.com/octocat)
+[![octocat's GitHub profile stats](https://YOUR-DOMAIN/api/card/octocat/pull-requests?theme=paper)](https://github.com/octocat)
 ```
 
 ## Data truth and credentials
 
 - Query `user(login:)` and its default trailing-year `contributionsCollection`.
-  Select calendar totals, weeks, day dates/counts/levels, and collection
-  boundaries. Avoid repository enumeration and privileged profile fields.
+  Select calendar totals, weeks, day dates/counts/levels, collection boundaries,
+  and period PR/review/issue/commit counters. Enumerate only PUBLIC repositories
+  with ownerAffiliations OWNER, including forks, ordered by stars. Sum every
+  page before publishing star totals; return the top five. Abort the complete
+  lookup after 20 seconds; never publish partial totals or private repo data.
+  Never request privileged profile fields.
 - Label this as contributions in the displayed period, never “all commits.”
   Show the actual date range. Longest streak is “Longest streak in period.”
 - Active days have count > 0. Current streak ends today if today is active;

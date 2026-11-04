@@ -12,6 +12,11 @@
 4. Verify the card in an actual GitHub README. A local browser success is not
    proof that GitHub's image proxy has fetched it.
 
+The public studio is `https://dither-studio-olive.vercel.app`. Its home page is a
+card gallery; dedicated pages include `/cards/pull-requests`, `/cards/stars`,
+`/cards/streaks`, and `/cards/frequency`. Each page exports
+`/api/card/USERNAME/TYPE`, using the same SVG as its preview.
+
 No application database, cron, external renderer, or visitor authentication is
 required. `/skill` serves the tracked skill; its file is explicitly included in
 Next's deployment trace. `serverExternalPackages` preserves the Node SVG renderer.
@@ -24,9 +29,15 @@ may include private activity, particularly for its owner. Do not deploy the
 developer's GitHub CLI token or copy it into environment files. Check the actual
 public-access credential against its owner and at least one unrelated account.
 
-The application requests only login, collection bounds, and contribution calendar
-dates/counts/levels. It does not enumerate repository identities or request private
-profile fields. This does not by itself prove a credential is correctly scoped.
+The application requests login, collection bounds, contribution calendar,
+period PR/review/issue/commit counters, and public owned repository names,
+descriptions, stars, forks and ownership/privacy checks. It never requests
+private repositories or privileged profile fields. PUBLIC and OWNER filters
+apply on every repository page, including token-owner lookups. Star totals sum
+all pages under one 20-second deadline; a page failure fails the full lookup
+instead of exposing partial totals. The top five repositories are retained in
+public responses; arbitrary designs do not trigger separate GitHub fetches.
+This does not by itself prove a credential is correctly scoped.
 Count differences from an owner's signed-in GitHub view can be expected.
 
 If credentials are missing, invalid, or expired, live routes return safe errors,

@@ -4,7 +4,9 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "version": { "const": 1 },
+    "version": {
+      "const": 1
+    },
     "title": {
       "type": "string",
       "maxLength": 64,
@@ -20,18 +22,36 @@
       "maxLength": 64,
       "pattern": "^[^\\u0000-\\u001f\\u007f]*$"
     },
-    "font": { "enum": ["sans", "mono", "serif"] },
-    "pattern": { "enum": ["bayer", "dots", "weave"] },
-    "radius": { "type": "integer", "minimum": 0, "maximum": 24 },
+    "font": {
+      "enum": ["sans", "mono", "serif"]
+    },
+    "pattern": {
+      "enum": ["bayer", "dots", "weave"]
+    },
+    "radius": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 24
+    },
     "palette": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "background": { "$ref": "#/$defs/color" },
-        "foreground": { "$ref": "#/$defs/color" },
-        "muted": { "$ref": "#/$defs/color" },
-        "accent": { "$ref": "#/$defs/color" },
-        "grid": { "$ref": "#/$defs/color" }
+        "background": {
+          "$ref": "#/$defs/color"
+        },
+        "foreground": {
+          "$ref": "#/$defs/color"
+        },
+        "muted": {
+          "$ref": "#/$defs/color"
+        },
+        "accent": {
+          "$ref": "#/$defs/color"
+        },
+        "grid": {
+          "$ref": "#/$defs/color"
+        }
       }
     },
     "links": {
@@ -56,7 +76,43 @@
           }
         }
       }
+    },
+    "metrics": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "contributions",
+          "pullRequests",
+          "reviews",
+          "issues",
+          "commits",
+          "stars",
+          "repositories",
+          "activeDays",
+          "currentStreak",
+          "longestStreak"
+        ]
+      }
+    },
+    "chartStyle": {
+      "enum": ["area", "line", "bars"]
+    },
+    "groupBy": {
+      "enum": ["day", "week", "month"]
+    },
+    "repoCount": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5
     }
   },
-  "$defs": { "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" } }
+  "$defs": {
+    "color": {
+      "type": "string",
+      "pattern": "^#[0-9a-fA-F]{6}$"
+    }
+  }
 }

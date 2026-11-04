@@ -46,6 +46,19 @@ test("CLI produces usable linked artwork, round-trips snapshots, and protects ex
       roundTrip,
     );
     assert.equal(snapshot.status, 0, snapshot.stderr);
+    for (const filename of [
+      "pull-requests.svg",
+      "stars.svg",
+      "streak-spectrum.svg",
+      "stats.svg",
+      "repositories.svg",
+      "frequency.svg",
+      "streaks.svg",
+    ])
+      assert.equal(
+        await readFile(path.join(roundTrip, filename), "utf8"),
+        await readFile(path.join(out, filename), "utf8"),
+      );
     assert.match(
       await readFile(path.join(roundTrip, "README.md"), "utf8"),
       /Sample artwork/,
@@ -53,6 +66,24 @@ test("CLI produces usable linked artwork, round-trips snapshots, and protects ex
     assert.match(
       await readFile(path.join(roundTrip, "calendar.svg"), "utf8"),
       /Sample artwork/,
+    );
+    const legacyData = JSON.parse(
+      await readFile(path.join(out, "profile-data.json"), "utf8"),
+    );
+    delete legacyData.activity;
+    delete legacyData.repositories;
+    const legacyFile = path.join(temp, "legacy.json");
+    await writeFile(legacyFile, JSON.stringify(legacyData));
+    const legacy = run(
+      "--data",
+      legacyFile,
+      "--out",
+      path.join(temp, "legacy"),
+    );
+    assert.equal(legacy.status, 0, legacy.stderr);
+    assert.match(
+      await readFile(path.join(temp, "legacy", "pull-requests.svg"), "utf8"),
+      /—/,
     );
     const malformed = path.join(temp, "bad.json");
     await writeFile(

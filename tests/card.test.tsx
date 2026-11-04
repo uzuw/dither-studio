@@ -8,7 +8,14 @@ import {
   renderLink,
 } from "../lib/card";
 import { sampleProfile } from "../lib/demo";
-import { defaultRecipe, LAYOUTS, PATTERNS, THEMES } from "../lib/recipe";
+import {
+  CHART_STYLES,
+  defaultRecipe,
+  GROUPS,
+  LAYOUTS,
+  PATTERNS,
+  THEMES,
+} from "../lib/recipe";
 
 test("dither levels are monotonic, deterministic, and have exact densities", () => {
   assert.equal(new Set(BAYER).size, 16);
@@ -78,4 +85,56 @@ test("profile wrapping preserves Unicode characters across line boundaries", () 
   });
   assert.equal(Buffer.from(svg).toString("utf8"), svg);
   assert.equal((svg.match(/💙/gu) ?? []).length, 30);
+});
+
+test("empty and legacy snapshots render honest zero/unavailable states in every new layout", () => {
+  const profile = sampleProfile();
+  profile.weeks = [];
+  profile.total = 0;
+  profile.stats = { activeDays: 0, currentStreak: 0, longestStreak: 0 };
+  profile.activity = null;
+  profile.repositories = null;
+  for (const layout of LAYOUTS) {
+    const svg = renderCard(profile, { layout, theme: "paper" });
+    assert.doesNotMatch(svg, /NaN|Infinity|undefined/);
+  }
+  assert.match(renderCard(profile, { layout: "stats", theme: "paper" }), /—/);
+  assert.match(
+    renderCard(profile, { layout: "repositories", theme: "paper" }),
+    /unavailable/,
+  );
+  assert.match(
+    renderCard(profile, { layout: "streaks", theme: "paper" }),
+    /No active streaks/,
+  );
+});
+
+test("chart styles preserve bounded SVG size and custom metrics render in the chosen order", () => {
+  const profile = sampleProfile();
+  for (const groupBy of GROUPS)
+    for (const chartStyle of CHART_STYLES) {
+      const svg = renderCard(profile, {
+        layout: "frequency",
+        theme: "midnight",
+        recipe: { ...defaultRecipe("midnight"), groupBy, chartStyle },
+      });
+      assert.ok(
+        Buffer.byteLength(svg) < 100_000,
+        `${groupBy} ${chartStyle}: ${Buffer.byteLength(svg)}`,
+      );
+      assert.doesNotMatch(svg, /NaN|Infinity/);
+    }
+  const svg = renderCard(profile, {
+    layout: "stats",
+    theme: "paper",
+    recipe: { ...defaultRecipe(), metrics: ["stars", "pullRequests"] },
+  });
+  assert.ok(svg.indexOf(">Stars received<") < svg.indexOf(">PRs opened<"));
+  const repos = renderCard(profile, {
+    layout: "repositories",
+    theme: "paper",
+    recipe: { ...defaultRecipe(), repoCount: 1 },
+  });
+  assert.match(repos, /dither-studio/);
+  assert.doesNotMatch(repos, /small-hours/);
 });

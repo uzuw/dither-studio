@@ -20,13 +20,16 @@ export function Header() {
       </Link>
       <nav aria-label="Main navigation">
         <Link href="/" className="nav-studio">
-          The studio
+          Choose a card
         </Link>
         <Link href="/guide">
           Made for agents <Icon name="code" size={16} />
         </Link>
       </nav>
-      <a className="open-source-tag" href="https://github.com/uzuw/dither-studio">
+      <a
+        className="open-source-tag"
+        href="https://github.com/uzuw/dither-studio"
+      >
         Open source. Open canvas.
       </a>
     </header>

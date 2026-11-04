@@ -16,17 +16,17 @@ export default function Guide() {
           Your rules.
         </h1>
         <p className="guide-lead">
-          The studio is a starting point. The skill gives your coding agent the
-          recipe, renderer, and export workflow to make something unmistakably
-          yours.
+          Choose a card in the gallery to open its own editor. The skill gives
+          your coding agent the recipe, renderer, and export workflow to make
+          something unmistakably yours.
         </p>
         <section>
           <h2>Start with a prompt</h2>
           <blockquote>
             Read the Dither skill and make a README for @uzuw. Use a blue and
-            white dithered landscape, monospace type, my introduction, a
-            contribution calendar, and social panels. Generate the SVG files and
-            show me a preview.
+            white palette, monospace type, PRs, stars, a contribution curve,
+            weekday rhythm, and social panels. Generate the SVG files and show
+            me a preview.
           </blockquote>
           <p>
             Use it with Codex, Claude, Hermes, or another agent that can read
@@ -40,14 +40,15 @@ export default function Guide() {
         <section>
           <h2>Two ways to make it yours</h2>
           <p>
-            <strong>In the studio:</strong> edit colors, texture, type, and the
-            JSON recipe. Copy the generated URL into your README. The hosted
-            image fetches your activity with cached updates.
+            <strong>In the studio:</strong> choose and order metrics, edit
+            charts, colors, texture, type, and the JSON recipe. Copy the
+            generated URL into your README. The hosted image fetches your
+            activity with cached updates.
           </p>
           <p>
             <strong>In your own checkout:</strong> give your agent{" "}
             <code>skills/dither-readme/SKILL.md</code>. Ask it to edit a recipe
-            or the renderer. The CLI generates profile, calendar, stats, social
+            or the renderer. The CLI generates all eleven focused cards, social
             panels, and a README you can host directly in your profile
             repository.
           </p>
@@ -80,7 +81,10 @@ export default function Guide() {
         </section>
         <section id="open-source">
           <h2>Open source, all the way down.</h2>
-          <a className="guide-link" href="https://github.com/uzuw/dither-studio">
+          <a
+            className="guide-link"
+            href="https://github.com/uzuw/dither-studio"
+          >
             View source and fork Dither
           </a>
           <p>

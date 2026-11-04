@@ -1,11 +1,59 @@
 import { PublicError } from "./types";
 
-export const LAYOUTS = ["calendar", "stats", "profile"] as const;
+export const LAYOUTS = [
+  "overview",
+  "stats",
+  "frequency",
+  "rhythm",
+  "distribution",
+  "streaks",
+  "repositories",
+  "calendar",
+  "profile",
+] as const;
 export type Layout = (typeof LAYOUTS)[number];
 export const THEMES = ["paper", "midnight"] as const;
 export type Theme = (typeof THEMES)[number];
 export const PATTERNS = ["bayer", "dots", "weave"] as const;
 export const FONTS = ["sans", "mono", "serif"] as const;
+export const METRICS = [
+  "contributions",
+  "pullRequests",
+  "reviews",
+  "issues",
+  "commits",
+  "stars",
+  "repositories",
+  "activeDays",
+  "currentStreak",
+  "longestStreak",
+] as const;
+export type Metric = (typeof METRICS)[number];
+export const metricNames: Record<Metric, string> = {
+  contributions: "Contributions",
+  pullRequests: "PRs opened",
+  reviews: "PR reviews",
+  issues: "Issues opened",
+  commits: "Commit contributions",
+  stars: "Stars received",
+  repositories: "Public repositories",
+  activeDays: "Active days",
+  currentStreak: "Current streak",
+  longestStreak: "Longest streak in period",
+};
+export const layoutNames: Record<Layout, string> = {
+  overview: "Profile overview",
+  stats: "Stats card",
+  frequency: "Contribution curve",
+  rhythm: "Weekday rhythm",
+  distribution: "Activity distribution",
+  streaks: "Streak spectrum",
+  repositories: "Top repositories",
+  calendar: "Classic calendar",
+  profile: "Profile header",
+};
+export const CHART_STYLES = ["area", "line", "bars"] as const;
+export const GROUPS = ["day", "week", "month"] as const;
 export type Palette = {
   background: string;
   foreground: string;
@@ -21,6 +69,10 @@ export type Recipe = {
   font: (typeof FONTS)[number];
   pattern: (typeof PATTERNS)[number];
   radius: number;
+  metrics: Metric[];
+  chartStyle: (typeof CHART_STYLES)[number];
+  groupBy: (typeof GROUPS)[number];
+  repoCount: number;
   palette: Palette;
   links: { label: string; url: string }[];
 };
@@ -52,6 +104,19 @@ export function defaultRecipe(theme: Theme = "paper"): Recipe {
     font: "sans",
     pattern: "bayer",
     radius: 16,
+    metrics: [
+      "contributions",
+      "pullRequests",
+      "stars",
+      "currentStreak",
+      "reviews",
+      "issues",
+      "activeDays",
+      "longestStreak",
+    ],
+    chartStyle: "area",
+    groupBy: "week",
+    repoCount: 3,
     palette: { ...palettes[theme] },
     links: [],
   };
@@ -112,6 +177,10 @@ export function parseRecipe(input: unknown, theme: Theme = "paper"): Recipe {
     "radius",
     "palette",
     "links",
+    "metrics",
+    "chartStyle",
+    "groupBy",
+    "repoCount",
   ]);
   if (obj.version !== undefined && obj.version !== 1)
     throw new PublicError("Recipe version must be 1.");
@@ -140,6 +209,23 @@ export function parseRecipe(input: unknown, theme: Theme = "paper"): Recipe {
     radius > 24
   )
     throw new PublicError("Corner radius must be an integer from 0 to 24.");
+  const metrics = obj.metrics ?? defaults.metrics;
+  if (
+    !Array.isArray(metrics) ||
+    !metrics.length ||
+    metrics.length > 8 ||
+    new Set(metrics).size !== metrics.length ||
+    metrics.some((metric) => !METRICS.includes(metric))
+  )
+    throw new PublicError("Choose 1–8 different supported metrics.");
+  const repoCount = obj.repoCount ?? defaults.repoCount;
+  if (
+    typeof repoCount !== "number" ||
+    !Number.isInteger(repoCount) ||
+    repoCount < 1 ||
+    repoCount > 5
+  )
+    throw new PublicError("Show between 1 and 5 repositories.");
   let links: Recipe["links"] = [];
   if (obj.links !== undefined) {
     if (!Array.isArray(obj.links) || obj.links.length > 4)
@@ -179,6 +265,10 @@ export function parseRecipe(input: unknown, theme: Theme = "paper"): Recipe {
     font: choice(obj.font, FONTS, defaults.font),
     pattern: choice(obj.pattern, PATTERNS, defaults.pattern),
     radius,
+    metrics: [...metrics],
+    chartStyle: choice(obj.chartStyle, CHART_STYLES, defaults.chartStyle),
+    groupBy: choice(obj.groupBy, GROUPS, defaults.groupBy),
+    repoCount,
     palette,
     links,
   };

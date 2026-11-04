@@ -1287,3 +1287,227 @@ select {
     scroll-behavior: auto !important;
   }
 }
+
+/* Keep composition controls quiet beside the actual exported card. */
+.layout-picker select,
+.detail-controls select,
+.custom-design input[type="text"],
+.custom-design input:not([type]) {
+  width: 100%;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--paper, #f5f7fa);
+  color: var(--ink, #172033);
+  font: inherit;
+  font-size: 12px;
+}
+.layout-description {
+  margin-top: 10px;
+  line-height: 1.6;
+}
+.chart-controls {
+  border: 0;
+  padding: 0;
+  margin: 22px 0;
+}
+.chart-controls legend {
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+.control-details {
+  border-top: 1px solid var(--line);
+  margin-top: 20px;
+  padding-top: 14px;
+  font-size: 12px;
+}
+.control-details summary {
+  cursor: pointer;
+  line-height: 1.6;
+}
+.control-details summary span {
+  float: right;
+  color: var(--muted);
+}
+.metric-picker {
+  border: 0;
+  padding: 12px 0 0;
+  margin-top: 10px;
+}
+.metric-picker label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+}
+.metric-picker input {
+  accent-color: var(--accent);
+}
+.metric-order {
+  padding-left: 18px;
+  margin: 15px 0 0;
+}
+.metric-order li {
+  padding: 5px 0;
+}
+.metric-order li span {
+  display: inline-block;
+  width: calc(100% - 57px);
+}
+.metric-order button {
+  font: inherit;
+  font-size: 10px;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+}
+.metric-order button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.custom-design {
+  margin-top: 12px;
+}
+.custom-design > label {
+  margin-top: 12px;
+  display: block;
+}
+.custom-design input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+.custom-design .accent-row {
+  margin-top: 9px;
+}
+.workspace {
+  align-self: start;
+}
+@media (max-width: 760px) {
+  .controls > .chart-controls,
+  .controls > .control-details,
+  .controls > .repo-controls {
+    grid-column: 1 / -1;
+    margin-top: 0;
+  }
+  .controls > .chart-controls {
+    margin-bottom: 0;
+  }
+  .controls > .chart-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 14px;
+  }
+  .chart-controls select {
+    grid-row: 2;
+  }
+  .controls > .chart-controls label {
+    margin: 0;
+  }
+  .layout-picker select {
+    font-size: 11px;
+    padding: 9px 5px;
+  }
+}
+@media (max-width: 760px) {
+  .artwork-scroll.overview .card-artwork,
+  .artwork-scroll.frequency .card-artwork,
+  .artwork-scroll.rhythm .card-artwork,
+  .artwork-scroll.distribution .card-artwork,
+  .artwork-scroll.streaks .card-artwork,
+  .artwork-scroll.repositories .card-artwork {
+    min-width: 720px;
+  }
+  .custom-design.detail-controls {
+    display: block;
+  }
+  .custom-design input[type="text"],
+  .custom-design input:not([type]) {
+    margin-top: 6px;
+  }
+}
+
+@media (max-width: 760px) {
+  .controls > .layout-picker,
+  .controls > .palette-picker {
+    grid-column: 1 / -1;
+  }
+}
+
+.card-catalog {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+  padding-bottom: 28px;
+}
+.card-choice {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: white;
+  text-decoration: none;
+}
+.card-choice:hover {
+  border-color: var(--accent);
+}
+.catalog-artwork {
+  display: flex;
+  align-items: center;
+  min-height: 210px;
+  padding: 20px;
+  background: #eaf0f7;
+}
+.catalog-artwork img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.card-choice-copy {
+  padding: 22px;
+}
+.card-choice h2 {
+  font-size: 25px;
+  font-weight: 550;
+  letter-spacing: -0.6px;
+}
+.card-choice p {
+  color: var(--muted);
+  font-size: 14px;
+  margin-top: 9px;
+  line-height: 1.6;
+}
+.card-choice-copy > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent);
+  font-size: 13px;
+  margin-top: 18px;
+}
+.catalog-note {
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 50px;
+}
+.all-cards-link {
+  display: inline-block;
+  color: var(--accent);
+  font-size: 12px;
+  margin-top: 12px;
+}
+@media (max-width: 760px) {
+  .card-catalog {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+  .catalog-artwork {
+    min-height: 150px;
+    padding: 14px;
+  }
+  .card-choice-copy {
+    padding: 20px;
+  }
+}

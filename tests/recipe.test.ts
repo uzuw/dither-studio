@@ -37,6 +37,13 @@ test("recipe validates trust boundaries, sizes, and external link protocols", ()
     { subtitle: "bad\nline" },
     { unknown: true },
     { version: 2 },
+    { metrics: [] },
+    { metrics: ["stars", "stars"] },
+    { metrics: ["privateRepos"] },
+    { chartStyle: "javascript" },
+    { groupBy: "hour" },
+    { repoCount: 6 },
+    { repoCount: 1.5 },
     { links: [{ label: "bad", url: "javascript:alert(1)" }] },
     { links: [{ label: "bad", url: "https://user:password@example.com" }] },
     { links: Array(5).fill({ label: "x", url: "https://example.com" }) },
@@ -54,6 +61,16 @@ test("bounded Unicode recipes and invalid encodings", () => {
   for (const bad of ["!invalid", "A".repeat(3201), "a", "e30$"])
     assert.throws(() => decodeRecipe(bad));
   assert.equal(decodeRecipe(encodeRecipe(defaultRecipe())).version, 1);
+  const large = parseRecipe({
+    title: "💙".repeat(64),
+    subtitle: "💙".repeat(140),
+    tagline: "💙".repeat(64),
+    links: Array.from({ length: 4 }, () => ({
+      label: "💙".repeat(24),
+      url: "https://example.com/" + "a".repeat(140),
+    })),
+  });
+  assert.throws(() => encodeRecipe(large), /too large/);
 });
 test("canonical options reject duplicate/unknown knobs and normalize defaults", () => {
   assert.throws(() =>
@@ -76,4 +93,23 @@ test("canonical options reject duplicate/unknown knobs and normalize defaults", 
     ),
     "/api/card/uzuw?layout=stats&theme=midnight",
   );
+});
+
+test("metric order and chart composition survive portable URL encoding", () => {
+  const recipe = parseRecipe({
+    metrics: ["stars", "pullRequests"],
+    chartStyle: "bars",
+    groupBy: "month",
+    repoCount: 5,
+  });
+  const options = parseOptions(
+    new URLSearchParams(
+      cardPath("uzuw", { layout: "overview", theme: "paper", recipe }).split(
+        "?",
+      )[1],
+    ),
+  );
+  assert.deepEqual(options.recipe?.metrics, ["stars", "pullRequests"]);
+  assert.equal(options.recipe?.groupBy, "month");
+  assert.equal(options.layout, "overview");
 });

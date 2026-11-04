@@ -3,14 +3,18 @@ import path from "node:path";
 import { parseArgs } from "node:util";
 import { renderCard, renderLink } from "../lib/card";
 import { sampleProfile } from "../lib/demo";
-import { normalizeProfile, requestProfile } from "../lib/github-client";
+import {
+  normalizeMetrics,
+  normalizeProfile,
+  requestProfile,
+} from "../lib/github-client";
 import {
   defaultRecipe,
-  LAYOUTS,
   normalizeUsername,
   parseRecipe,
   record,
 } from "../lib/recipe";
+import { CARD_TYPES, cards, cardRecipe } from "../lib/cards";
 import { LEVELS, type Profile } from "../lib/types";
 
 async function main() {
@@ -81,6 +85,8 @@ async function main() {
       },
       data.fetchedAt,
     );
+    if (data.activity != null || data.repositories != null)
+      Object.assign(profile, normalizeMetrics(data));
     if (data.source === "sample") profile.source = "sample";
   } else
     profile = await requestProfile(
@@ -89,9 +95,17 @@ async function main() {
     );
 
   const output = path.resolve(values.out!);
-  const files: [string, string][] = LAYOUTS.map((layout) => [
-    `${layout}.svg`,
-    renderCard(profile, { layout, theme: "paper", recipe }, values.sample),
+  const files: [string, string][] = CARD_TYPES.map((type) => [
+    `${type}.svg`,
+    renderCard(
+      profile,
+      {
+        layout: cards[type].layout,
+        theme: "paper",
+        recipe: cardRecipe(type, "paper", values.recipe ? recipe : undefined),
+      },
+      values.sample,
+    ),
   ]);
   recipe.links.forEach((link, i) =>
     files.push([`link-${i + 1}.svg`, renderLink(link.label, recipe)]),
@@ -99,7 +113,13 @@ async function main() {
   const socialPanels = recipe.links.length
     ? `<p>${recipe.links.map((link, i) => `<a href="${escapeAttribute(link.url)}"><img src="./link-${i + 1}.svg" width="${Math.floor(100 / recipe.links.length)}%" alt="${escapeAttribute(link.label)}"></a>`).join("")}</p>\n`
     : "";
-  const markdown = `${profile.source === "sample" ? "> **Sample artwork — example data, not a real GitHub account's activity.**\n\n" : ""}[![${profile.username}'s profile](./profile.svg)](https://github.com/${profile.username})\n\n${socialPanels}\n![${profile.username}'s contribution graph](./calendar.svg)\n\n![${profile.username}'s GitHub stats](./stats.svg)\n\n<!-- Generated with Dither. Activity covers ${profile.start.slice(0, 10)} through ${profile.end.slice(0, 10)} (UTC). -->\n`;
+  const cardMarkdown = CARD_TYPES.filter((type) => type !== "profile")
+    .map(
+      (type) =>
+        `![${profile.username}'s ${cards[type].title.toLowerCase()}](./${type}.svg)`,
+    )
+    .join("\n\n");
+  const markdown = `${profile.source === "sample" ? "> **Sample artwork — example data, not a real GitHub account's activity.**\n\n" : ""}[![${profile.username}'s profile](./profile.svg)](https://github.com/${profile.username})\n\n${socialPanels}\n${cardMarkdown}\n\n<!-- Generated with Dither. Activity covers ${profile.start.slice(0, 10)} through ${profile.end.slice(0, 10)} (UTC). Stars and repositories are current public totals. -->\n`;
   files.push(
     ["README.md", markdown],
     ["dither.recipe.json", JSON.stringify(recipe, null, 2) + "\n"],

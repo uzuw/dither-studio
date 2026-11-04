@@ -1,17 +1,19 @@
 # dither.
 
-**Your GitHub, in print.** A contribution graph and profile artwork studio with
+**Your GitHub, in print.** A profile stats and activity chart studio with
 ordered pixels, halftone dots, and a little more personality.
 
-Enter a GitHub username, choose a layout, customize the design, and copy one line
+Choose a card, enter a GitHub username on its dedicated page, customize the design, and copy one line
 into your README. Or give the included skill to your coding agent and make a
 whole profile of your own. Open source under the [MIT license](LICENSE).
 
 [Open the studio](https://dither-studio-olive.vercel.app) · [Get the agent skill](skills/dither-readme/SKILL.md)
 
-![A Dither contribution calendar with clearly labeled sample data](https://dither-studio-olive.vercel.app/api/sample?theme=midnight)
+![A Dither PR card with clearly labeled sample data](docs/preview.svg)
 
-[Static artwork preview](docs/preview.svg)
+Live PR card, using cached public GitHub data:
+
+![uzuw's GitHub PR statistics, updated from cached public data](https://dither-studio-olive.vercel.app/api/card/uzuw/pull-requests?theme=midnight)
 
 ## Run the studio
 
@@ -37,17 +39,23 @@ this public service. Validate the intended public-access token before launch.
 
 ## What you can make
 
-- **Contribution calendar:** real week/day placement, five activity densities,
-  month labels, contribution total, and active days.
-- **Stats card:** contributions, active days, current streak, and longest streak
-  in the returned period. These are contributions, not lifetime commit totals.
-- **Profile header:** your introduction, a deterministic dithered landscape, and
-  matching colors/type. Local exports can add linked social panels.
+- **Contribution stats:** contributions, commit contributions and active days.
+- **Pull requests:** PRs opened and reviews left in the displayed period.
+- **Stars:** current stars and public owned repository counts.
+- **Streaks:** current streak, longest streak in period and active days.
+- **Contribution curve:** day/week/month counts rendered as dithered area, line, or bars.
+- **Weekday rhythm:** average contributions by weekday, using observed days.
+- **Activity distribution:** how often quiet days, small sessions and large bursts occur.
+- **Streak spectrum:** frequency of active run lengths, bounded by the period.
+- **Top repositories:** public owned repos ranked by stars, with configurable count.
+- **Classic calendar and profile header:** optional calendar and introduction artwork.
 
-Paper and Midnight are starting palettes. Customize every palette color, choose
-three textures and three portable font families, change copy and corners, or edit
-the JSON recipe. The preview and README use the **same self-contained SVG**.
-Website motion respects reduced motion; exports are static and readable.
+Select and reorder the metrics belonging to each card. Change all five palette colors,
+fonts, dither texture, title, footer, corners, chart style and aggregation directly
+in the studio. Designs travel in a validated JSON recipe in the image URL.
+Stars include public owned forks; organization-owned repositories are excluded.
+PR/review/issue/commit values cover GitHub's displayed contribution collection,
+not lifetime totals. No invented ratings or productivity scores.
 
 ## Make it with an agent
 
@@ -55,7 +63,7 @@ The portable entrypoint is [skills/dither-readme/SKILL.md](skills/dither-readme/
 Give Codex, Claude, Hermes, or another coding agent this prompt in a Dither checkout:
 
 > Read `skills/dither-readme/SKILL.md`. Make a README for @your-name with a blue
-> dithered landscape, a personal introduction, contribution graph, stats, and my
+> dithered palette, a personal introduction, PRs, stars, activity curves, and my
 > social links. Save a recipe, render the actual SVGs, and show me the result.
 
 The skill uses Markdown, JSON, TypeScript, and a local CLI. It requires no paid
@@ -95,7 +103,7 @@ npm run render -- --sample --recipe examples/after-hours.json --out output/sampl
 Sample images are visibly labeled. To regenerate from an exported public
 snapshot, replace `--username` with `--data path/to/profile-data.json`.
 
-Output contains `profile.svg`, `calendar.svg`, `stats.svg`, any `link-N.svg`
+Output contains all eleven focused SVGs (`pull-requests.svg`, `stars.svg`, `frequency.svg`, and more), any `link-N.svg`
 panels, `README.md`, `dither.recipe.json`, and public `profile-data.json`.
 Copy the folder into your profile repository and adjust your root README to
 point at it. A generated README assumes the SVGs are in the same directory.
@@ -112,20 +120,29 @@ Import your fork as a Next.js project, choose Node.js 22 or newer, and set a
 public-access `GITHUB_TOKEN` as a server-only Secret. Deploy to a stable public
 domain. No database, scheduler, or separate image service is needed.
 
-The API contracts are:
+The main routes are:
 
 ```text
+/                              # card gallery
+/cards/pull-requests            # PR card editor
+/cards/stars                   # stars card editor
+/cards/frequency               # contribution curve editor
 GET /api/profile/USERNAME
-GET /api/card/USERNAME
-GET /api/card/USERNAME?layout=stats&theme=midnight
-GET /api/card/USERNAME?layout=profile&recipe=BASE64URL_JSON
-GET /api/sample                 # visibly labeled example, never real activity
+GET /api/card/USERNAME/pull-requests
+GET /api/card/USERNAME/stars?theme=midnight
+GET /api/card/USERNAME/frequency?recipe=BASE64URL_JSON
+GET /api/sample/pull-requests   # labeled sample
 GET /skill                     # portable skill download
 ```
 
 Generate the exact image URL and Markdown in your deployment's studio. Localhost
 URLs cannot load from a GitHub README. See [deployment and caching](docs/deployment.md)
 for credential checks, abuse controls, headers, and the launch checklist.
+
+The home page is a gallery; every card type has its own editor and image route.
+Legacy `/api/card/USERNAME?layout=...` images remain supported, with calendar as
+the default. All card types and scoped metrics are documented in
+[customization](docs/customization.md).
 
 Profile data is cached for an hour independently of the design. Successful HTTP
 responses have a five-minute CDN cache plus stale revalidation. GitHub proxies

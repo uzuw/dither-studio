@@ -17,7 +17,46 @@ the local renderer, or give them to an agent using the portable
 | `pattern` | Activity texture | `bayer`, `dots`, `weave` |
 | `radius` | Outer corner radius, in SVG units | Integer, 0–24 |
 | `palette` | `background`, `foreground`, `muted`, `accent`, `grid` | Each is `#RRGGBB` |
+| `metrics` | Ordered subset of supported metrics | 1–8 unique items |
+| `chartStyle` | Contribution curve rendering | `area`, `line`, `bars` |
+| `groupBy` | UTC curve buckets | `day`, `week`, `month` |
+| `repoCount` | Top public owned repositories to show | Integer, 1–5 |
 | `links` | CLI social panels: `{ "label": "Website", "url": "https://…" }` | Up to 4; label 24 chars; URL 200 chars |
+
+Supported metric IDs: `contributions`, `pullRequests`, `reviews`, `issues`,
+`commits`, `stars`, `repositories`, `activeDays`, `currentStreak`, `longestStreak`.
+`metrics` controls metric cards, in the order given and within their allowed set. Most
+metrics cover the displayed contribution period; `stars` and `repositories`
+are current totals across public owned repositories, including forks.
+
+The gallery links to dedicated pages at `/cards/{type}`. Supported types:
+`stats`, `pull-requests`, `stars`, `streaks`, `frequency`, `rhythm`, `distribution`,
+`streak-spectrum`, `repositories`, `calendar`, and `profile`.
+
+| Card | Allowed metrics |
+| --- | --- |
+| `stats` | `contributions`, `commits`, `activeDays` |
+| `pull-requests` | `pullRequests`, `reviews` |
+| `stars` | `stars`, `repositories` |
+| `streaks` | `currentStreak`, `longestStreak`, `activeDays` |
+
+Each type has `/api/card/USERNAME/TYPE` and `/api/sample/TYPE` SVG routes.
+Use only `theme` and `recipe` on those image routes; `layout` is rejected.
+A recipe may select/reorder a subset of that card's metrics. Other metrics are
+rejected before an upstream request. Curves, distributions, repository lists
+and headers are separate cards. `/cards/streaks` is the streak summary;
+`/cards/streak-spectrum` is the run-length chart.
+
+Legacy `/api/card/USERNAME?layout=...` keeps the nine renderer layouts, including
+`overview`; omitted layout still means calendar. Combined overview is available
+only through the legacy image contract and source renderer.
+
+`frequency` shows exact counts by UTC day/week/month; partial weeks/months are
+included without extrapolation. `rhythm` averages by observed weekday count.
+`distribution` counts days in fixed count bins (including zero); those bins do
+not change GitHub's calendar activity levels. `streak-spectrum` shows how many active
+runs of each length occur; gaps and zeros break runs, and period edges bound them.
+These are alternate views of public activity, not measures of developer quality.
 
 Fields may be omitted; defaults fill them. Unknown fields are rejected to catch
 typos. Text cannot contain control characters. Links require HTTPS, a nonblank
@@ -46,20 +85,24 @@ GitHub is called. Defaults, casing, parameter order, and recipe encoding resolve
 to a canonical image URL. A complete custom recipe supplies its own palette,
 so the redundant theme parameter is omitted from the canonical URL.
 
-The generator's page URL also carries `username`, making a design shareable.
+The editor URL carries its card type in the path and `username` in the query, making a design shareable.
 Download a recipe to keep an editable version outside the URL.
 
 ## Customize beyond recipes
 
 | Change | Edit |
 | --- | --- |
-| New artwork or SVG composition | `lib/card.tsx` |
+| New artwork or SVG composition | `lib/card.tsx`, `lib/charts.tsx` |
 | Add a portable option | `lib/recipe.ts`, schema, studio controls, this guide |
 | Metric meaning or UTC calculations | `lib/stats.ts` and its tests |
 | New GitHub data fields | `lib/github-client.ts`, normalization, fixtures, credential review |
 | Website layout/motion | `components/generator.tsx`, `app/globals.css` |
 | Generated README/social composition | `scripts/render.tsx` |
 | Agent workflow | `skills/dither-readme/SKILL.md` |
+
+Global CLI recipes are filtered to each card's allowed metrics; if none match,
+that card uses its own defaults. For a hosted editor, use a recipe scoped to its
+card type. `lib/cards.ts` owns this mapping and default behavior.
 
 The renderer uses React's explicit Node server entrypoint. `next.config.ts`
 externalizes `react-dom` so Next's Server Component conditions do not substitute
@@ -78,8 +121,9 @@ licensed embedded-font or glyph-path solution and image-client verification.
 
 ## Compose a personal README
 
-The local CLI writes a profile header, contribution graph, stats, social panels,
-the recipe, and a data snapshot. Its README embeds local SVGs and wraps each
+The local CLI writes all eleven focused cards, social panels,
+the recipe, and a data snapshot. Older calendar-only snapshots render unavailable
+profile metrics as dashes; regenerate live data to populate those metrics. Its README embeds local SVGs and wraps each
 social panel in an HTTPS anchor. Put those files together in a profile repository
 or adjust paths when moving the Markdown into a larger README.
 

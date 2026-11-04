@@ -1,6 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { calculateStats, previousDay } from "../lib/stats";
+import {
+  activityInsights,
+  activitySeries,
+  calculateStats,
+  previousDay,
+} from "../lib/stats";
 import { day } from "./fixtures";
 
 test("empty calendars have zero stats", () => {
@@ -55,4 +60,49 @@ test("streaks stay bounded by the provided period and cannot bridge missing date
     ).longestStreak,
     2,
   );
+});
+
+test("activity series preserve totals across UTC weeks, leap days, and partial months", () => {
+  const days = [
+    day("2024-03-03", 4),
+    day("2024-02-29", 2),
+    day("2024-03-01", 3),
+  ];
+  assert.deepEqual(activitySeries(days, "month"), [
+    { label: "2024-02", count: 2, days: 1 },
+    { label: "2024-03", count: 7, days: 2 },
+  ]);
+  assert.deepEqual(activitySeries(days, "week"), [
+    { label: "2024-02-25", count: 5, days: 2 },
+    { label: "2024-03-03", count: 4, days: 1 },
+  ]);
+  assert.deepEqual(activitySeries([], "day"), []);
+  assert.equal(activitySeries(days, "day")[0].label, "2024-02-29");
+});
+
+test("rhythm uses observed-day denominators, distributions include zero, and missing dates break runs", () => {
+  const days = [
+    day("2024-02-28", 0),
+    day("2024-02-29", 4),
+    day("2024-03-01", 10),
+    day("2024-03-03", 20),
+    day("2024-03-07", 6),
+  ];
+  const insights = activityInsights(days);
+  assert.deepEqual(insights.weekdays[4], {
+    label: "Thu",
+    count: 10,
+    days: 2,
+    active: 2,
+  });
+  assert.deepEqual(
+    insights.distribution.map((p) => p.count),
+    [1, 1, 1, 1, 1],
+  );
+  assert.deepEqual(insights.streaks, [
+    { label: "1", count: 2 },
+    { label: "2", count: 1 },
+  ]);
+  assert.deepEqual(activityInsights([]).streaks, []);
+  assert.deepEqual(activityInsights([day("2024-02-28", 0)]).streaks, []);
 });

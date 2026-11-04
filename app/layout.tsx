@@ -6,7 +6,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Dither — your GitHub, in print",
   description:
-    "Dithered GitHub contribution graphs, stats, and personal README artwork. Customize in the studio or with your favorite coding agent.",
+    "GitHub PRs, stars, top repositories, streaks, and distinctive activity charts for your README. Customize in the studio or with your favorite coding agent.",
 };
 
 export default function RootLayout({

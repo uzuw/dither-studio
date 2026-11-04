@@ -33,6 +33,43 @@ export function sampleProfile(): Profile {
     end: `${end}T23:59:59Z`,
     fetchedAt: `${end}T12:00:00Z`,
     weeks,
+    activity: { pullRequests: 84, reviews: 126, issues: 32, commits: 1248 },
+    repositories: {
+      totalCount: 18,
+      stars: 2640,
+      top: [
+        {
+          name: "dither-studio",
+          description: "A print studio for your GitHub story.",
+          stars: 1240,
+          forks: 86,
+        },
+        {
+          name: "small-hours",
+          description: "Tools for the things you build after hours.",
+          stars: 640,
+          forks: 42,
+        },
+        {
+          name: "paper-trail",
+          description: "A place for ideas to take shape.",
+          stars: 412,
+          forks: 29,
+        },
+        {
+          name: "dot-matrix",
+          description: "Experiments in generative print.",
+          stars: 208,
+          forks: 12,
+        },
+        {
+          name: "field-notes",
+          description: "Notes from the work in progress.",
+          stars: 82,
+          forks: 6,
+        },
+      ],
+    },
     total: weeks.flat().reduce((sum, day) => sum + day.count, 0),
     stats: calculateStats(weeks.flat(), end),
   };

@@ -1,6 +1,6 @@
 ---
 name: dither-readme
-description: Create or customize dithered GitHub contribution graphs, stats cards, personal profile headers, and SVG-based READMEs using a Dither source checkout. Use for natural-language design requests, recipe changes, new SVG layouts, or local README exports.
+description: Create or customize GitHub profile stats, contribution curves, activity charts, personal headers, and SVG-based READMEs using a Dither source checkout. Use for natural-language design requests, recipe changes, new SVG layouts, or local README exports.
 ---
 
 # Dither README studio
@@ -30,14 +30,27 @@ new recipe for the user. For field limits and exact behavior, read
 `schema/recipe.schema.json`; runtime validation lives in `lib/recipe.ts`.
 
 Recipes control palette, title, subtitle, footer, system font family, dither
-texture, corners, and social links. They work in hosted image URLs and local
+texture, corners, social links, selected metrics/order, chart style, UTC
+aggregation, and repository count. They work in hosted image URLs and local
 exports. Recipe links generate adjoining linked panels in CLI README exports;
 the hosted profile card itself is one image and cannot contain clickable panels.
 
 If the brief needs a new composition, ornament, animation, exact custom font,
 or different graph layout, edit the source instead of pretending a recipe can
 express it. `lib/card.tsx` contains the SVG layouts and ordered patterns;
-`lib/stats.ts` owns period metrics. Preserve real activity counts, date placement,
+`lib/charts.tsx` contains the metrics, curves, repository panels and insight
+charts; `lib/stats.ts` owns period metrics and observed-day aggregation.
+Make separate focused cards. The gallery and `/cards/TYPE` pages offer PRs,
+stars, streak summaries, contribution stats, and each chart as separate choices.
+`lib/cards.ts` owns card types, defaults and allowed metrics; `lib/recipe.ts`
+owns renderer layouts and generic recipe validation. Do not bundle every stat
+into one image. Legacy overview images remain available for existing embeds.
+Hosted SVGs use `/api/card/USERNAME/TYPE?theme=...&recipe=...`; never put `layout`
+on those routes. Scope recipe metrics to the selected type before sharing.
+Stars/repository counts are current public owned totals (including forks);
+PR/review/issue/commit metrics and streaks cover the displayed period.
+Weekday rhythm uses observed-day denominators; the streak spectrum counts runs
+bounded by the period. Do not invent lifetime accuracy or exclusivity claims. Preserve real activity counts, date placement,
 the density legend, readable contrast, XML escaping, and accessible descriptions.
 Keep external resources out of SVGs. Website-only interactions cannot execute
 inside a README image. If adding optional SVG animation, provide a readable
@@ -66,8 +79,10 @@ Or use a previously exported public profile JSON:
 npm run render -- --data path/to/profile-data.json --recipe examples/my-design.json --out output/my-design
 ```
 
-The output includes `profile.svg`, `calendar.svg`, `stats.svg`, optional social
-panels, `README.md`, the resolved recipe, and public profile data. Choose a new
+The output includes `stats.svg`, `pull-requests.svg`, `stars.svg`, `streaks.svg`,
+`frequency.svg`, `rhythm.svg`, `distribution.svg`, `streak-spectrum.svg`,
+`repositories.svg`, `calendar.svg`, `profile.svg`, optional social panels,
+`README.md`, the resolved recipe, and public profile data. Choose a new
 directory for iterations; `--force` explicitly replaces those generated files.
 Do not silently replace the user's existing README. Compose or update only the
 section they asked for and preserve unrelated content.

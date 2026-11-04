@@ -13,5 +13,18 @@
     "accent": "#C9ADFF",
     "grid": "#44365E"
   },
-  "links": []
+  "links": [],
+  "metrics": [
+    "pullRequests",
+    "stars",
+    "currentStreak",
+    "longestStreak",
+    "reviews",
+    "issues",
+    "contributions",
+    "activeDays"
+  ],
+  "chartStyle": "line",
+  "groupBy": "week",
+  "repoCount": 3
 }

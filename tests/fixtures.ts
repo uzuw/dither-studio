@@ -14,7 +14,23 @@ export function githubPayload(
   return {
     user: {
       login: "octocat",
+      repositories: {
+        totalCount: 0,
+        nodes: [] as {
+          name: string;
+          description: string | null;
+          stargazerCount: number;
+          forkCount: number;
+          isPrivate: boolean;
+          owner: { login: string };
+        }[],
+        pageInfo: { hasNextPage: false, endCursor: null as string | null },
+      },
       contributionsCollection: {
+        totalPullRequestContributions: 3,
+        totalPullRequestReviewContributions: 2,
+        totalIssueContributions: 1,
+        totalCommitContributions: 4,
         startedAt: `${days[0]?.date ?? "2026-11-02"}T00:00:00Z`,
         endedAt: "2026-11-03T23:59:59Z",
         contributionCalendar: {
