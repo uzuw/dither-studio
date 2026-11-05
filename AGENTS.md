@@ -247,6 +247,9 @@ Example Markdown shape, using an explicitly illustrative domain:
 - Treat GitHub Camo as another cache: README freshness is outside our complete
   control. Say “cached updates,” never “real time.” Do not add timestamp query
   parameters to bypass caches.
+- Start new platform abuse rules in log-only observation mode and inspect the
+  staged diff. `examples/firewall-api-observe.json` is the project's initial
+  scoped GET rule; check the deployed draft/active state before changing it.
 - Before inviting public traffic, configure available platform abuse limits and
   check costs/quotas. Account for legitimate shared image-proxy traffic; do not
   put a browser challenge/login in front of README image routes.

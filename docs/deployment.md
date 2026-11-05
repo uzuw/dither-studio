@@ -86,6 +86,35 @@ If the token's quota is exhausted, allow the reset window, investigate uncached
 traffic, and adjust cache/abuse settings. Do not rotate many personal tokens to
 evade GitHub's limits.
 
+## API traffic observation draft
+
+On 2026-11-05, a validated rule was staged for this project:
+`rule_dither_git_hub_api_traffic_observation_at5mMu`.
+Its source is [examples/firewall-api-observe.json](../examples/firewall-api-observe.json).
+
+- Scope: `GET /api/profile/*` or `GET /api/card/*`, including legacy image routes.
+- Threshold: 300 requests per IP per 60 seconds, fixed window, per region.
+- Threshold action: **log**. This observes traffic without blocking or challenges.
+- Gallery samples, editor pages, other methods and other routes are excluded.
+
+The draft is not active in production. In the
+[Vercel Firewall dashboard](https://vercel.com/uzuws-projects/dither-studio/firewall),
+review the single staged change and publish it to begin observing traffic.
+The equivalent CLI commands, with an authenticated Vercel CLI, are:
+
+```sh
+vercel firewall diff --scope uzuws-projects --project dither-studio
+vercel firewall publish --scope uzuws-projects --project dither-studio --yes
+```
+
+Publishing firewall settings does not require an app deployment. Review real
+traffic before switching the threshold action to 429. GitHub Camo and corporate
+networks can share source IPs; do not introduce browser challenges or low IP
+limits on image routes. Rate limiting counts are regional and do not impose a
+global GitHub API budget. Review your plan's
+[rate-limit usage and pricing](https://vercel.com/docs/vercel-firewall/vercel-waf/rate-limiting)
+before publishing or changing the rule.
+
 ## Static generation alternative
 
 The CLI can generate SVGs directly into your profile repository. Relative image

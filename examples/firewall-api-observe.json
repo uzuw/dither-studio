@@ -1,0 +1,47 @@
+{
+  "name": "Dither GitHub API traffic observation",
+  "description": "Observe high-rate GET traffic to GitHub-backed endpoints; log-only rollout protects shared README image proxies from accidental blocking.",
+  "active": true,
+  "conditionGroup": [
+    {
+      "conditions": [
+        {
+          "type": "method",
+          "op": "eq",
+          "value": "GET"
+        },
+        {
+          "type": "path",
+          "op": "pre",
+          "value": "/api/profile/"
+        }
+      ]
+    },
+    {
+      "conditions": [
+        {
+          "type": "method",
+          "op": "eq",
+          "value": "GET"
+        },
+        {
+          "type": "path",
+          "op": "pre",
+          "value": "/api/card/"
+        }
+      ]
+    }
+  ],
+  "action": {
+    "mitigate": {
+      "action": "rate_limit",
+      "rateLimit": {
+        "algo": "fixed_window",
+        "window": 60,
+        "limit": 300,
+        "keys": ["ip"],
+        "action": "log"
+      }
+    }
+  }
+}
