@@ -5,6 +5,14 @@ the local renderer, or give them to an agent using the portable
 [Dither skill](../skills/dither-readme/SKILL.md). Start with
 [Blueprint](../examples/blueprint.json) or [After hours](../examples/after-hours.json).
 
+The studio offers Paper, Midnight, Blueprint, Rose, Moss, and Graphite theme
+presets above its background/color controls. Each applies a palette, texture,
+font and corner radius while keeping your text, selected metrics, chart style,
+grouping and repository count. Adjusting the design shows “Custom design” until
+it matches a preset again. Presets use ordinary recipes in preview, share and
+export URLs; they add no image API parameters or new `theme` values. Their
+definitions live in [lib/presets.ts](../lib/presets.ts).
+
 ## Recipe contract
 
 | Field | Meaning | Bound |

@@ -86,9 +86,9 @@ If the token's quota is exhausted, allow the reset window, investigate uncached
 traffic, and adjust cache/abuse settings. Do not rotate many personal tokens to
 evade GitHub's limits.
 
-## API traffic observation draft
+## API traffic observation
 
-On 2026-11-05, a validated rule was staged for this project:
+On 2026-11-05, the owner published this validated rule for the project:
 `rule_dither_git_hub_api_traffic_observation_at5mMu`.
 Its source is [examples/firewall-api-observe.json](../examples/firewall-api-observe.json).
 
@@ -97,10 +97,14 @@ Its source is [examples/firewall-api-observe.json](../examples/firewall-api-obse
 - Threshold action: **log**. This observes traffic without blocking or challenges.
 - Gallery samples, editor pages, other methods and other routes are excluded.
 
-The draft is not active in production. In the
-[Vercel Firewall dashboard](https://vercel.com/uzuws-projects/dither-studio/firewall),
-review the single staged change and publish it to begin observing traffic.
-The equivalent CLI commands, with an authenticated Vercel CLI, are:
+Post-publication verification found firewall configuration version 1 active,
+the rule enabled with the log action above, and no pending draft. The public
+profile endpoint and both paper PR and midnight stars SVG endpoints returned
+HTTP 200 with valid JSON/XML. Review observed requests in the
+[Vercel Firewall traffic view](https://vercel.com/uzuws-projects/dither-studio/firewall/traffic?filter=rule_dither_git_hub_api_traffic_observation_at5mMu).
+
+For future rule changes, review the draft before publishing it with an
+authenticated Vercel CLI:
 
 ```sh
 vercel firewall diff --scope uzuws-projects --project dither-studio

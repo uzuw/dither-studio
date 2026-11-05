@@ -44,6 +44,10 @@ Reference research and the reasons for these decisions live in
    and their order, area/line/bar curves, day/week/month grouping, one to five
    repositories, all colors, text, corners, fonts, and links.
    Agents can edit source for arbitrary compositions.
+   Editors offer Paper, Midnight, Blueprint, Rose, Moss, and Graphite presets
+   above visible background/color controls. Presets change colors, texture,
+   font, and corners while preserving text, metrics, and chart settings; they
+   travel through the existing bounded recipe contract.
 4. A preview using the exact dedicated SVG endpoint used in the generated README snippet.
 5. Copy Markdown, copy image URL, and download the same SVG.
 6. Shareable card editor URLs preserving card type, username, palette, and recipe.

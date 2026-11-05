@@ -176,6 +176,8 @@ export function cardEditorPath(
   options: CardOptions = { layout: cards[type].layout, theme: "paper" },
 ) {
   const params = cardParams(options);
+  if (options.recipe && options.theme !== "paper")
+    params.set("theme", options.theme);
   if (username) params.set("username", normalizeUsername(username));
   const query = params.toString();
   return `/cards/${type}${query ? `?${query}` : ""}`;

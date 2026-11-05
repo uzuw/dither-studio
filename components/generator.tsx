@@ -14,13 +14,12 @@ import {
   CHART_STYLES,
   GROUPS,
   normalizeUsername,
-  palettes,
   parseRecipe,
   PATTERNS,
   type CardOptions,
   type Recipe,
-  type Theme,
 } from "../lib/recipe";
+import { matchingPreset, presets } from "../lib/presets";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -103,6 +102,7 @@ export function Generator({
     () => "",
   );
   const recipe = options.recipe ?? cardRecipe(cardType, options.theme);
+  const selectedPreset = matchingPreset(recipe);
   const imagePath =
     view.kind === "ready"
       ? cardImagePath(view.profile.username, cardType, options)
@@ -176,14 +176,14 @@ export function Generator({
     }
   }
 
-  function updateRecipe(patch: Partial<Recipe>) {
+  function updateRecipe(patch: Partial<Recipe>, theme = options.theme) {
     try {
       const next = parseRecipe({ ...recipe, ...patch });
       parseCardOptions(
         cardType,
         new URLSearchParams({ recipe: encodeRecipe(next) }),
       );
-      setOptions((current) => ({ ...current, recipe: next }));
+      setOptions((current) => ({ ...current, theme, recipe: next }));
       setDraft(JSON.stringify(next, null, 2));
       setRecipeError("");
       setImageError(false);
@@ -195,17 +195,6 @@ export function Generator({
       setRecipeError(message);
       setNotice(message);
     }
-  }
-  function themeChanged(theme: Theme) {
-    setOptions((current) => ({
-      ...current,
-      theme,
-      recipe: current.recipe
-        ? { ...current.recipe, palette: { ...palettes[theme] } }
-        : undefined,
-    }));
-    setDraft(JSON.stringify({ ...recipe, palette: palettes[theme] }, null, 2));
-    setImageError(false);
   }
   function applyRecipe() {
     try {
@@ -320,7 +309,13 @@ export function Generator({
                     view.kind === "ready"
                       ? view.profile.username
                       : (request?.username ?? ""),
-                    { layout: cards[next].layout, theme: options.theme },
+                    {
+                      layout: cards[next].layout,
+                      theme: options.theme,
+                      recipe: options.recipe
+                        ? cardRecipe(next, options.theme, options.recipe)
+                        : undefined,
+                    },
                   ),
                 );
               }}
@@ -337,6 +332,181 @@ export function Generator({
             </Link>
           </fieldset>
 
+          <fieldset className="palette-picker">
+            <legend>Theme presets</legend>
+            <p className="help preset-help">
+              Pick a starting look, then fine-tune below.
+            </p>
+            <div className="palette-options">
+              {presets.map((preset) => (
+                <label
+                  key={preset.id}
+                  className={`palette-option ${selectedPreset?.id === preset.id ? "selected" : ""}`}
+                >
+                  <input
+                    type="radio"
+                    name="preset"
+                    value={preset.id}
+                    checked={selectedPreset?.id === preset.id}
+                    onChange={() => updateRecipe(preset.design, preset.theme)}
+                  />
+                  <span
+                    className={`palette-swatch ${preset.design.pattern}`}
+                    style={{
+                      backgroundColor: preset.design.palette.background,
+                      color: preset.design.palette.accent,
+                    }}
+                    aria-hidden="true"
+                  >
+                    <i />
+                    <i />
+                    <i />
+                  </span>
+                  <span className="preset-name">
+                    {preset.name}
+                    {selectedPreset?.id === preset.id && (
+                      <Icon name="check" size={12} />
+                    )}
+                  </span>
+                </label>
+              ))}
+            </div>
+            <p className="help preset-status" aria-live="polite">
+              {selectedPreset ? `${selectedPreset.name} selected` : "Custom design"}
+            </p>
+          </fieldset>
+
+          <fieldset className="color-controls">
+            <legend>Colors &amp; background</legend>
+            {(Object.keys(recipe.palette) as (keyof Recipe["palette"])[]).map(
+              (key) => (
+                <div className="accent-row" key={key}>
+                  <label htmlFor={`color-${key}`}>
+                    {
+                      {
+                        background: "Background",
+                        foreground: "Text color",
+                        muted: "Secondary text",
+                        accent: "Ink color",
+                        grid: "Grid & texture",
+                      }[key]
+                    }
+                  </label>
+                  <div>
+                    <input
+                      id={`color-${key}`}
+                      type="color"
+                      value={recipe.palette[key]}
+                      onChange={(event) =>
+                        updateRecipe({
+                          palette: {
+                            ...recipe.palette,
+                            [key]: event.target.value,
+                          },
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+              ),
+            )}
+          </fieldset>
+
+          <div className="detail-controls">
+            <label htmlFor="pattern">Dither texture</label>
+            <select
+              id="pattern"
+              value={recipe.pattern}
+              onChange={(event) =>
+                updateRecipe({
+                  pattern: event.target.value as Recipe["pattern"],
+                })
+              }
+            >
+              {PATTERNS.map((pattern) => (
+                <option key={pattern} value={pattern}>
+                  {
+                    {
+                      bayer: "Ordered pixels",
+                      dots: "Halftone dots",
+                      weave: "Woven ink",
+                    }[pattern]
+                  }
+                </option>
+              ))}
+            </select>
+            <label htmlFor="font">Type style</label>
+            <select
+              id="font"
+              value={recipe.font}
+              onChange={(event) =>
+                updateRecipe({ font: event.target.value as Recipe["font"] })
+              }
+            >
+              {FONTS.map((font) => (
+                <option value={font} key={font}>
+                  {
+                    {
+                      sans: "Modern sans",
+                      mono: "Monospace",
+                      serif: "Editorial serif",
+                    }[font]
+                  }
+                </option>
+              ))}
+            </select>
+          </div>
+          <details className="control-details">
+            <summary>Text &amp; corners</summary>
+            <div className="detail-controls custom-design">
+              <label htmlFor="card-title">Card title</label>
+              <input
+                id="card-title"
+                type="text"
+                value={recipe.title}
+                maxLength={64}
+                placeholder="Use my GitHub username"
+                onChange={(event) =>
+                  updateRecipe({ title: event.target.value })
+                }
+              />
+              {options.layout === "profile" && (
+                <>
+                  <label htmlFor="card-subtitle">Introduction</label>
+                  <input
+                    id="card-subtitle"
+                    value={recipe.subtitle}
+                    maxLength={140}
+                    onChange={(event) =>
+                      updateRecipe({ subtitle: event.target.value })
+                    }
+                  />
+                </>
+              )}
+              <label htmlFor="card-footer">Footer text</label>
+              <input
+                id="card-footer"
+                value={recipe.tagline}
+                maxLength={64}
+                onChange={(event) =>
+                  updateRecipe({ tagline: event.target.value })
+                }
+              />
+              <label htmlFor="corner-radius">
+                Corner radius: {recipe.radius}
+              </label>
+              <input
+                id="corner-radius"
+                type="range"
+                min="0"
+                max="24"
+                value={recipe.radius}
+                onChange={(event) =>
+                  updateRecipe({ radius: Number(event.target.value) })
+                }
+              />
+            </div>
+          </details>
           {options.layout === "frequency" && (
             <fieldset className="chart-controls detail-controls">
               <legend>Contribution curve</legend>
@@ -459,162 +629,6 @@ export function Generator({
             </div>
           )}
 
-          <fieldset className="palette-picker">
-            <legend>Palette</legend>
-            <div className="palette-options">
-              {(["paper", "midnight"] as const).map((theme) => (
-                <label
-                  key={theme}
-                  className={`palette-option ${options.theme === theme ? "selected" : ""}`}
-                >
-                  <input
-                    type="radio"
-                    name="theme"
-                    value={theme}
-                    checked={options.theme === theme}
-                    onChange={() => themeChanged(theme)}
-                  />
-                  <span
-                    className={`palette-swatch ${theme}`}
-                    aria-hidden="true"
-                  >
-                    <i />
-                    <i />
-                    <i />
-                  </span>
-                  <span>{theme === "paper" ? "Paper" : "Midnight"}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-
-          <div className="detail-controls">
-            <label htmlFor="pattern">Dither texture</label>
-            <select
-              id="pattern"
-              value={recipe.pattern}
-              onChange={(event) =>
-                updateRecipe({
-                  pattern: event.target.value as Recipe["pattern"],
-                })
-              }
-            >
-              {PATTERNS.map((pattern) => (
-                <option key={pattern} value={pattern}>
-                  {
-                    {
-                      bayer: "Ordered pixels",
-                      dots: "Halftone dots",
-                      weave: "Woven ink",
-                    }[pattern]
-                  }
-                </option>
-              ))}
-            </select>
-            <label htmlFor="font">Type style</label>
-            <select
-              id="font"
-              value={recipe.font}
-              onChange={(event) =>
-                updateRecipe({ font: event.target.value as Recipe["font"] })
-              }
-            >
-              {FONTS.map((font) => (
-                <option value={font} key={font}>
-                  {
-                    {
-                      sans: "Modern sans",
-                      mono: "Monospace",
-                      serif: "Editorial serif",
-                    }[font]
-                  }
-                </option>
-              ))}
-            </select>
-          </div>
-          <details className="control-details">
-            <summary>Colors, text &amp; corners</summary>
-            <div className="detail-controls custom-design">
-              {(Object.keys(recipe.palette) as (keyof Recipe["palette"])[]).map(
-                (key) => (
-                  <div className="accent-row" key={key}>
-                    <label htmlFor={`color-${key}`}>
-                      {
-                        {
-                          background: "Background",
-                          foreground: "Text color",
-                          muted: "Secondary text",
-                          accent: "Ink color",
-                          grid: "Grid & texture",
-                        }[key]
-                      }
-                    </label>
-                    <div>
-                      <input
-                        id={`color-${key}`}
-                        type="color"
-                        value={recipe.palette[key]}
-                        onChange={(event) =>
-                          updateRecipe({
-                            palette: {
-                              ...recipe.palette,
-                              [key]: event.target.value,
-                            },
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
-                ),
-              )}
-              <label htmlFor="card-title">Card title</label>
-              <input
-                id="card-title"
-                type="text"
-                value={recipe.title}
-                maxLength={64}
-                placeholder="Use my GitHub username"
-                onChange={(event) =>
-                  updateRecipe({ title: event.target.value })
-                }
-              />
-              {options.layout === "profile" && (
-                <>
-                  <label htmlFor="card-subtitle">Introduction</label>
-                  <input
-                    id="card-subtitle"
-                    value={recipe.subtitle}
-                    maxLength={140}
-                    onChange={(event) =>
-                      updateRecipe({ subtitle: event.target.value })
-                    }
-                  />
-                </>
-              )}
-              <label htmlFor="card-footer">Footer text</label>
-              <input
-                id="card-footer"
-                value={recipe.tagline}
-                maxLength={64}
-                onChange={(event) =>
-                  updateRecipe({ tagline: event.target.value })
-                }
-              />
-              <label htmlFor="corner-radius">
-                Corner radius: {recipe.radius}
-              </label>
-              <input
-                id="corner-radius"
-                type="range"
-                min="0"
-                max="24"
-                value={recipe.radius}
-                onChange={(event) =>
-                  updateRecipe({ radius: Number(event.target.value) })
-                }
-              />
-            </div>
-          </details>
           <button
             className="recipe-toggle"
             onClick={() => {

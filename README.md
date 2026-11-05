@@ -50,7 +50,9 @@ this public service. Validate the intended public-access token before launch.
 - **Top repositories:** public owned repos ranked by stars, with configurable count.
 - **Classic calendar and profile header:** optional calendar and introduction artwork.
 
-Select and reorder the metrics belonging to each card. Change all five palette colors,
+Start with Paper, Midnight, Blueprint, Rose, Moss, or Graphite, then fine-tune
+the background and colors directly below the presets. Presets keep your text,
+metrics and chart settings. Select and reorder the metrics belonging to each card. Change all five palette colors,
 fonts, dither texture, title, footer, corners, chart style and aggregation directly
 in the studio. Designs travel in a validated JSON recipe in the image URL.
 Stars include public owned forks; organization-owned repositories are excluded.
